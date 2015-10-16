@@ -5,7 +5,7 @@ date: "October 13, 2015"
 output: html_document
 ---
 
-# Reproducible Research
+# **Reproducible Research**
 
 
 ##Set directory and link raw data
