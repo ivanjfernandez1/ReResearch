@@ -1,0 +1,115 @@
+
+#Title: "Assignment 2-Impact of Weather Events on Human Well-Being"
+
+
+
+
+
+
+##SYNOPSIS
+####Weather events is the US cause multiple fatalities and hundreds of injuries in the US. The U.S. National Oceanic and Atmospheric Administration's (NOAA) colects data on the type of weather events related to either a death or an injury.  The following research is aimed at discovering the type of events, impact, and frequencie in the US.
+
+
+
+
+
+
+
+##DATA PROCESSING
+
+Raw data from NOAA can be dowloaded from https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2
+After setting directory to local drive, read csv file using read.csv
+
+```{r, cache=TRUE}
+
+  echo = TRUE
+    setwd("C:/Users/ivan/Desktop/datasciencecoursera/ReResearch")
+         data <- read.csv("repdata_data_StormData.csv.bz2")
+```
+This research will use ggplot2 and plyr libraries. Load libraries:
+```{r cache=TRUE}
+         
+            library(ggplot2)
+                library(plyr)
+```
+Explore data by summarizing fields
+```{r, cache=TRUE}
+
+   summary (data)
+```
+
+
+For simplicity, after reviewing existing fields, we created a new dataset with only those fields relevant to this research: EvType, Fatalities, Injuries, Propdmg and Cropdmg. Remove rows where there are no readings (all fields =0) for the different types (EVTYPE)
+
+```{r ,cache=TRUE}
+
+  keyfields <- c("EVTYPE", "FATALITIES", "INJURIES", "PROPDMG", "CROPDMG")
+      data <- data[, keyfields]
+          data<- data[!(data$FATALITIES == 0 & data$INJURIES == 0 & data$PROPDMG == 0 & data$CROPDMG == 0), ]
+```
+**Data ready for calculation**
+
+##RESULTS
+
+We treated death and injuries separately.
+We first focused on death by creating a table aggregating the number of deaths by weather event (EVTYPE)
+
+```{r, cache=TRUE}
+  death <- aggregate(data$FATALITIES ~ data$EVTYPE, FUN = sum)
+     death2 <- death[complete.cases(death), ]
+        colnames(death2) <- c("type", "deaths")
+            death2 <- death2[order(death2$death, decreasing = TRUE), ]
+                 death2 <- death2[!(death2$death == 0), ]     
+                       head(death2)
+``` 
+
+**Tornados are the main caused of weather related deaths (5,633) in the US followed by Excessive Heat (1,903) and Flash Floods (978)**
+
+```{r}
+barplot(head(death2$deaths), names.arg = head(death2$type), main = "Figure 1.1 Deaths Distribution by Weather Events", ylab = "# of Deaths", xlab = "Type", cex.names = 0.4)
+```
+
+**In Figure 1.1 we see that deaths caused by Tornados are more frequent than all other deaths combined. Tornados alone are a significant threat to human life**
+
+
+
+**Non lethal events may also cause a great deal of damage and phisical trauma to humans. We continued by looking at injuries to humans very much in the same way we looked at deaths.**
+
+```{r, cache=TRUE}
+injurie <- aggregate(data$INJURIES ~ data$EVTYPE, FUN = sum)
+    injurie2 <- injurie[complete.cases(injurie), ]
+        colnames(injurie2) <- c("Type", "Injuries")
+            injurie2 <- injurie2[order(injurie2$Injuries, decreasing = TRUE), ]
+                injurie2 <- injurie2[!(injurie2$Injuries == 0), ] 
+                head(injurie2)
+```
+
+**Just as in the case of deaths, Tornados deliver the largest amount of injurie cases with a total of 91,346. Floods are once again in the top 3 most damaging events(6,789) but, as seen above, Excessive Heat (6,525)is not on the top 3 injury causing weather events.**
+
+```{r, cache=TRUE}
+barplot(head(injurie2$Injuries), names.arg = head(injurie2$Type), main = "Figure 1.2 Injuries Distribution by Weather Events", ylab = "# of Injuries", xlab = "Type", cex.names = 0.4)                
+```                
+
+
+**In Figure 1.2 we see that Tornados continue to be the main threat to humans. Injuries caused by all other types of events are very similar.**
+
+
+**Damaged caused by weather events is not limited to physical damange to human. These events cause millions of dollars in damage to personal property, crops and the overall economic activity.  The economic consequences of these events can be devastating for a region and even for the nation as a whole.**
+
+
+```{r,cache=TRUE}
+eco <- aggregate(data$PROPDMG ~ data$EVTYPE, FUN = sum)
+    eco2 <- eco[complete.cases(eco), ]
+        colnames(eco2) <- c("Type", "EconomicDamage")
+            eco2 <- eco2[order(eco2$EconomicDamage, decreasing = TRUE), ]
+                eco2 <- eco2[!(eco2$EconomicDamage == 0), ]
+                    head(eco2)
+```
+
+**Tornado once again top the chart as the most devastating weather phenomena. Tornados alone have caused $3,212,258.2 in economic damaged, followed by Flash Floods with $1,420,124 in water damage and TSTM Wind with $1,224,965 in damages.**
+
+```{r,cache=TRUE}
+barplot(head(eco2$EconomicDamage), names.arg = head(eco2$Type), main = "Figure 2.1 Economic Damage Distribution by Weather Events", ylab = "Damage", xlab = "Type", cex.names = 0.4)         
+```
+
+**Figure 2.1 continues to show that tornados are devastating weather events at both physical and economical levels.  We also see that some non-life threating events such as Hail can have devastating economic consequences for the US.**
